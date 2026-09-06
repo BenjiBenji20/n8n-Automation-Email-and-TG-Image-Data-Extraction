@@ -1,3 +1,29 @@
+# 🚀 Built my first two n8n automation workflows — sharing what I learned!
+
+As part of a technical assessment, I designed and built two end-to-end automation pipelines using n8n, Google Workspace APIs, Telegram, and Google Gemini. Coming in with zero prior n8n experience, this was a solid crash course in workflow automation architecture.
+
+## Workflow 1: Multi-Label Gmail → Sheets & Drive
+📧 Polls Gmail across multiple labels on a schedule
+📊 Extracts sender details into Google Sheets automatically
+📁 Downloads attachments to Drive, auto-organized by Label → Date → Sender — with duplicate-folder prevention via a search-before-create pattern
+
+## Workflow 2: Telegram Receipt Processing with AI
+🤖 Accepts receipt photos sent via Telegram
+🧠 Uses Google Gemini's vision capabilities to extract merchant name, amount, and date
+📊 Logs structured data to Google Sheets
+📁 Archives original photos to Drive, organized by submission date
+
+## Key technical challenges I worked through:
+- Handling binary data (attachments/images) correctly across multiple node types — easy to accidentally strip it without noticing
+- Building idempotent folder creation in Google Drive (Search → conditional Create, to avoid duplicate folders on repeated runs)
+- Looping over dynamic attachment counts (1 email could have 1 or several files)
+- Prompt engineering Gemini for reliable structured JSON output from images
+
+It's a great reminder that "no-code" automation still demands real engineering thinking — data flow, state management, and edge cases don't disappear just because you're dragging nodes instead of writing functions.
+
+**Watch Demo**: [Demo vid](https://drive.google.com/drive/folders/1Efx1xGpdpUmozOTDP51-FizF_VZyZyeu?usp=sharing)
+---
+
 ### Sanitized Files
 1. [Job Application Assessment_ Email Extraction Workflow.json](file:///c:/Users/imper/Downloads/n8n/Job%20Application%20Assessment_%20Email%20Extraction%20Workflow.json)
 2. [Job Application Assessment_ Telegram Receipt Photo Processing.json](file:///c:/Users/imper/Downloads/n8n/Job%20Application%20Assessment_%20Telegram%20Receipt%20Photo%20Processing.json)

@@ -7,11 +7,19 @@ As part of a technical assessment, I designed and built two end-to-end automatio
 📊 Extracts sender details into Google Sheets automatically
 📁 Downloads attachments to Drive, auto-organized by Label → Date → Sender — with duplicate-folder prevention via a search-before-create pattern
 
+### Architecture
+
+<img width="1680" height="283" alt="Image" src="https://github.com/user-attachments/assets/ad6373db-c7f9-47aa-99e0-1c9be9c2475a" />
+
 ## Workflow 2: Telegram Receipt Processing with AI
 🤖 Accepts receipt photos sent via Telegram
 🧠 Uses Google Gemini's vision capabilities to extract merchant name, amount, and date
 📊 Logs structured data to Google Sheets
 📁 Archives original photos to Drive, organized by submission date
+
+### Architecture
+
+<img width="1712" height="412" alt="Image" src="https://github.com/user-attachments/assets/0aea9a03-b079-4ce2-9500-cfc1b84f6f6d" />
 
 ## Key technical challenges I worked through:
 - Handling binary data (attachments/images) correctly across multiple node types — easy to accidentally strip it without noticing

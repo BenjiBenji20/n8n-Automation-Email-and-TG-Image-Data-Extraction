@@ -11,6 +11,8 @@ As part of a technical assessment, I designed and built two end-to-end automatio
 
 <img width="1680" height="283" alt="Image" src="https://github.com/user-attachments/assets/ad6373db-c7f9-47aa-99e0-1c9be9c2475a" />
 
+**Watch Demo**: [Workflow 1 Demo](https://youtu.be/PYuRil0SWfY)
+
 ## Workflow 2: Telegram Receipt Processing with AI
 🤖 Accepts receipt photos sent via Telegram
 🧠 Uses Google Gemini's vision capabilities to extract merchant name, amount, and date
@@ -21,6 +23,8 @@ As part of a technical assessment, I designed and built two end-to-end automatio
 
 <img width="1712" height="412" alt="Image" src="https://github.com/user-attachments/assets/0aea9a03-b079-4ce2-9500-cfc1b84f6f6d" />
 
+**Watch Demo**: [Workflow 2 Demo](https://youtu.be/LcCgv6-p99I)
+
 ## Key technical challenges I worked through:
 - Handling binary data (attachments/images) correctly across multiple node types — easy to accidentally strip it without noticing
 - Building idempotent folder creation in Google Drive (Search → conditional Create, to avoid duplicate folders on repeated runs)
@@ -29,7 +33,6 @@ As part of a technical assessment, I designed and built two end-to-end automatio
 
 It's a great reminder that "no-code" automation still demands real engineering thinking — data flow, state management, and edge cases don't disappear just because you're dragging nodes instead of writing functions.
 
-**Watch Demo**: [Demo vid](https://drive.google.com/drive/folders/1Efx1xGpdpUmozOTDP51-FizF_VZyZyeu?usp=sharing)
 ---
 
 ### Sanitized Files

@@ -1,0 +1,1441 @@
+{
+  "name": "Job Application Assessment: Email Extraction Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "YOUR_GMAIL_LABEL_ID_1"
+          ],
+          "readStatus": "unread"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "42b2c0e7-baf0-444c-a0f8-2f445da6d141",
+      "name": "Trigger Label 1",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        6592,
+        96
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "fetch emails from selected gmail label."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "886ee40c-da40-45f1-b989-2930175d3152",
+              "name": "label",
+              "value": "label 1",
+              "type": "string"
+            },
+            {
+              "id": "896f4b5d-1c66-4a13-b7b9-806c8ada088e",
+              "name": "messageId",
+              "value": "={{ $json.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "18581f9f-8bcc-4a36-81c2-7ff195bdb30f",
+              "name": "senderName",
+              "value": "={{ $json.from['value'][0]['name'] || $json.from['value'][0]['address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f766293d-4cf5-424c-a66a-c96185fd91fd",
+              "name": "senderEmail",
+              "value": "={{ $json.from['value'][0]['address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "86bdc88f-482e-42ed-94a4-5b23d26ee2e0",
+              "name": "dateReceived",
+              "value": "={{ $json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "b68577ad-66e9-4e25-98df-70e4a80b8273",
+              "name": "subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "75b2537f-0e46-499a-895e-0a680622943b",
+              "name": "emailBodyText",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "163267d2-e83d-411c-a43b-84cab8e85b97",
+      "name": "Extract Fields Label 1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        6816,
+        96
+      ],
+      "notes": "extracting data from labels"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1356f9e1-b781-4df2-b5c5-aac292415cd7",
+              "name": "sourceLabel",
+              "value": "={{ $json.label }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "e17c5644-380c-4bad-aa87-091f12171aec",
+      "name": "Extraction Sender Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        7040,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Email Sender Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Message ID ": "={{ $json.messageId }}",
+            "Sender Email": "={{ $json.senderEmail }}",
+            "Sender Name ": "={{ $json.senderName }}",
+            "Date Received": "={{ $json.dateReceived }}",
+            "Subject": "={{ $json.subject }}",
+            "Label": "={{ $json.sourceLabel }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Message ID ",
+              "displayName": "Message ID ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Name ",
+              "displayName": "Sender Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Email",
+              "displayName": "Sender Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date Received",
+              "displayName": "Date Received",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Label",
+              "displayName": "Label",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "27b93ee9-81b4-4718-bccd-11dc79f42a8a",
+      "name": "Append row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        7264,
+        192
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "include": "allOtherFields",
+        "options": {
+          "includeBinary": true
+        }
+      },
+      "id": "54e788e0-8b6b-49aa-a5c5-5380f84ba9f8",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        7264,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $('Split Out').item.json.sourceLabel }}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "id": "b94c3f65-ea85-4ae1-8c60-153776f2d40e",
+      "name": "Search files and folders",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        7712,
+        384
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const found = $input.all().filter(i => i.json && i.json.id);\nreturn [{\n  json: {\n    exists: found.length > 0,\n    folderId: found.length > 0 ? found[0].json.id : null\n  }\n}];"
+      },
+      "id": "ff1cf933-eae5-43d9-922f-c13b196cb6f6",
+      "name": "Code in JavaScript1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7936,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "77df9082-a6f7-4353-b38a-308f06fbdb9e",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a397be7b-f970-46c0-926e-25ef314e264e",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        8160,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "91b106cf-7b3e-47e3-b210-db72385abeb8",
+              "name": "folderId",
+              "value": "={{ $json.folderId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5dcd46ee-3a09-4dff-b612-0a07de2d269d",
+      "name": "Use Existing Label Folder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        8384,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ new Date($('Split Out').item.json.dateReceived).toISOString().split('T')[0] }}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.folderId }}"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "id": "57364abf-b7e0-46a2-a241-cc06f2d2d496",
+      "name": "Search Date Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        8832,
+        384
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const found = $input.all().filter(i => i.json && i.json.id);\nlet labelFolderId = null;\ntry { labelFolderId = $('Use Existing Label Folder').item.json.folderId; } catch (e) {}\nif (labelFolderId == null) { try { labelFolderId = $('Edit Fields').item.json.folderId; } catch (e) {} }\nreturn [{\n  json: {\n    exists: found.length > 0,\n    dateFolderId: found.length > 0 ? found[0].json.id : null,\n    labelFolderId: labelFolderId\n  }\n}];"
+      },
+      "id": "0d1feaab-8c20-42d8-a220-c985a23ccd1d",
+      "name": "Check Date Folder Exists",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9056,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a901f41b-1930-410a-8109-7d84bc1fbb99",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "338d4380-5206-4fac-89e7-d37dbfbe4eca",
+      "name": "If Date Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        9280,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51b2a9e1-229d-4c31-9bb0-aa21bf998a44",
+              "name": "dateFolderId",
+              "value": "={{ $json.dateFolderId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "16400282-7dae-48ec-b707-c8bec510b3f9",
+      "name": "Use Existing Date Folder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        9504,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $('Split Out').item.json.senderName }}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.dateFolderId }}"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "id": "df46983a-1298-41b7-85e0-b62cace70b5a",
+      "name": "Search Sender Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        9952,
+        384
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const found = $input.all().filter(i => i.json && i.json.id);\nlet dateFolderId = null;\ntry { dateFolderId = $('Use Existing Date Folder').item.json.dateFolderId; } catch (e) {}\nif (dateFolderId == null) { try { dateFolderId = $('Edit Date Fields').item.json.dateFolderId; } catch (e) {} }\nreturn [{\n  json: {\n    exists: found.length > 0,\n    senderFolderId: found.length > 0 ? found[0].json.id : null,\n    dateFolderId: dateFolderId\n  }\n}];"
+      },
+      "id": "8d763822-0fd4-437b-a06c-64e252768212",
+      "name": "Check Sender Folder Exists",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10176,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c101a182-38b1-419b-a019-911762aa1123",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f9ffeb4f-5ab0-47fc-a316-5ed4deed563d",
+      "name": "If Sender Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        10400,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "18a1a9e9-1122-48a0-bb11-477bb19901aa",
+              "name": "senderFolderId",
+              "value": "={{ $json.senderFolderId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "83281c68-96d3-4ab5-8dc3-bc84e0d8dffb",
+      "name": "Use Existing Sender Folder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        10624,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let senderFolderId = null;\ntry { senderFolderId = $('Use Existing Sender Folder').item.json.senderFolderId; } catch (e) {}\nif (senderFolderId == null) { try { senderFolderId = $('Edit Sender Fields').item.json.senderFolderId; } catch (e) {} }\nreturn {\n  json: {\n    ...$('Split Out').item.json,\n    senderFolderId: senderFolderId\n  },\n  binary: $('Split Out').item.binary\n};"
+      },
+      "id": "21a36e38-c081-41df-8faf-2c8d7e8b3ec4",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11072,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ Object.keys($binary)[0] }}",
+        "name": "={{ $binary[Object.keys($binary)[0]].fileName || $binary[Object.keys($binary)[0]].filename }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.senderFolderId }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "643765fd-4c06-47b4-8408-5bc97e73563b",
+      "name": "Upload Attachment File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        11296,
+        384
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "018757e1-80fe-4bde-bb33-e6d977e1afac",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        7488,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Split Out').item.json.senderName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.dateFolderId }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "283e0689-ce63-486c-b8f0-683943bd59d7",
+      "name": "Create Folder - Sender",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        10624,
+        480
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "891100aa-1928-48b2-8119-9118aa72611a",
+              "name": "senderFolderId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b81e44f-3e69-4a73-9f48-039a20cab181",
+      "name": "Edit Sender Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        10848,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Split Out').item.json.dateReceived ? new Date($('Split Out').item.json.dateReceived).toISOString().split('T')[0] : new Date().toISOString().split('T')[0] }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.labelFolderId }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "a3ccbe18-3984-4532-bd86-33cc1f41e3ae",
+      "name": "Create Folder - Date",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        9504,
+        480
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6735a110-449b-4e17-b7ab-01a2c9183bf1",
+              "name": "dateFolderId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5fd50ef8-e3a4-4d76-b46d-094fb7874ab2",
+      "name": "Edit Date Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        9728,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Split Out').item.json.sourceLabel }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "mode": "list",
+          "cachedResultName": "n8n automation",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_FOLDER_ID"
+        },
+        "options": {}
+      },
+      "id": "1ec5a234-0f5f-4797-b3fe-b3e5fc5cbb91",
+      "name": "Create Folder - Label",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        8384,
+        480
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0c07096-4f69-4ede-be88-847ed3b3f1c3",
+              "name": "folderId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a5fecd33-9b86-4f1b-8ad0-7f1f2c5a8aa5",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        8608,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "YOUR_GMAIL_LABEL_ID_2"
+          ],
+          "readStatus": "unread"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "c3adb1e3-a1b4-4bbf-bbdc-62a8fd41ab84",
+      "name": "Trigger Label 2",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        6592,
+        288
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "fetch emails from selected gmail label."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "886ee40c-da40-45f1-b989-2930175d3152",
+              "name": "label",
+              "value": "label 2",
+              "type": "string"
+            },
+            {
+              "id": "896f4b5d-1c66-4a13-b7b9-806c8ada088e",
+              "name": "messageId",
+              "value": "={{ $json.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "18581f9f-8bcc-4a13-81c2-7ff195bdb30f",
+              "name": "senderName",
+              "value": "={{ $json.from['value'][0]['name'] || $json.from['value'][0]['address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f766293d-4cf5-424c-a66a-c96185fd91fd",
+              "name": "senderEmail",
+              "value": "={{ $json.from['value'][0]['address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "86bdc88f-482e-42ed-94a4-5b23d26ee2e0",
+              "name": "dateReceived",
+              "value": "={{ $json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "b68577ad-66e9-4e25-98df-70e4a80b8273",
+              "name": "subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "75b2537f-0e46-499a-895e-0a680622943b",
+              "name": "emailBodyText",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "0f317716-7090-478d-8d60-21d2cf93d679",
+      "name": "Extract Fields Label 2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        6816,
+        288
+      ],
+      "notes": "extracting data from labels"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "YOUR_GMAIL_LABEL_ID_3"
+          ],
+          "readStatus": "unread"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "c7626c00-caa5-4d15-8681-c1262a4cb61a",
+      "name": "Trigger Label 3",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        6592,
+        480
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "fetch emails from selected gmail label."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "886ee40c-da40-45f1-b989-2930175d3152",
+              "name": "label",
+              "value": "label 3",
+              "type": "string"
+            },
+            {
+              "id": "896f4b5d-1c66-4a13-b7b9-806c8ada088e",
+              "name": "messageId",
+              "value": "={{ $json.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "18581f9f-8bcc-4a36-81c2-7ff195bdb30f",
+              "name": "senderName",
+              "value": "={{ $json.from['value'][0]['name'] || $json.from['value'][0]['address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f766293d-4cf5-424c-a66a-c96185fd91fd",
+              "name": "senderEmail",
+              "value": "={{ $json.from['value'][0]['address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "86bdc88f-482e-42ed-94a4-5b23d26ee2e0",
+              "name": "dateReceived",
+              "value": "={{ $json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "b68577ad-66e9-4e25-98df-70e4a80b8273",
+              "name": "subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "75b2537f-0e46-499a-895e-0a680622943b",
+              "name": "emailBodyText",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d5709bdb-dbc1-4ffb-aa35-e09d09d50bb1",
+      "name": "Extract Fields Label 3",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        6816,
+        480
+      ],
+      "notes": "extracting data from labels"
+    },
+    {
+      "parameters": {
+        "content": "## Gmail Trigger for 3 Labels\n\nGmail side automatically goes emails to specific labels by implementing filter logic.\n\nThese triggers automatically fires when receives a new emails on their specified labels.",
+        "height": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6288,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "3edca01c-0571-49fd-bce4-49aded7a7880",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Field Extractors\n\n3 fields extractors to only collect necessary data from triggers.\n\nExtraction sender info flags the data by label id and pass to sheet.",
+        "height": 240
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6992,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "faca6ee5-8e34-422e-b77e-368e5ae031eb",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## GSheet\n\nAppend row in a sheet one-by-one.",
+        "height": 112
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        7392,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "ab2a3718-291b-47b6-86f1-0a10640c77ae",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Split out & Loop Items for Attachments\n\nThese nodes are the starting branch of processing attachments.\n\n**Split Out**: extract binary data (attachment).\n\n**Loop Over Items**: loops the entire branch once the first or preceeding attachment has been uploaded to the folder. Necessary for processing multiple attachments in an email.\n",
+        "height": 272,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        7184,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "861c6343-8274-45eb-90e5-daa1d7f5f32c",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Search, Filter & Conditional Nodes\n\nThese nodes are necessary to avoid duplication of folder creation.\n\n**Search files/folders**: Searches Label folder by id.\n\n**JS Code**: Filters the searched folders and returns a json obj.\n\n**IF**: Conditional flow if json object from Code node exists, it passed the flow on top branch to use existing label folder, else at bottom branch to create label folder.\n",
+        "height": 272,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        7712,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "714fa6a7-c885-4c21-b11f-99e706eb5c2a",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Search, Filter & Conditional Nodes\n\nSimilar to the first search, filter and conditional nodes.\n\nNecessary to avoid folder duplication during creation.\n",
+        "height": 144,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        8832,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "20f729ca-96ff-4ae2-9e79-182c8b116940",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Search, Filter & Conditional Nodes\n\nSimilar to the first search, filter and conditional nodes.\n\nNecessary to avoid folder duplication during creation.\n",
+        "height": 144,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        9936,
+        192
+      ],
+      "typeVersion": 1,
+      "id": "5e338966-bfe4-4d9b-9a5a-964dc51e5b5d",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Attachment Upload\n\nFinally, attachment from email would be upload in its correct folder.\nUpload is one-by-one.\n",
+        "height": 144,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        11136,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "4943df9c-28f2-4c1c-a251-4f4af1534882",
+      "name": "Sticky Note7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger Label 1": {
+      "main": [
+        [
+          {
+            "node": "Extract Fields Label 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Fields Label 1": {
+      "main": [
+        [
+          {
+            "node": "Extraction Sender Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraction Sender Info": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Use Existing Label Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Folder - Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Existing Label Folder": {
+      "main": [
+        [
+          {
+            "node": "Search Date Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Date Folder": {
+      "main": [
+        [
+          {
+            "node": "Check Date Folder Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Date Folder Exists": {
+      "main": [
+        [
+          {
+            "node": "If Date Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Date Exists": {
+      "main": [
+        [
+          {
+            "node": "Use Existing Date Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Folder - Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Existing Date Folder": {
+      "main": [
+        [
+          {
+            "node": "Search Sender Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Sender Folder": {
+      "main": [
+        [
+          {
+            "node": "Check Sender Folder Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Sender Folder Exists": {
+      "main": [
+        [
+          {
+            "node": "If Sender Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Sender Exists": {
+      "main": [
+        [
+          {
+            "node": "Use Existing Sender Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Folder - Sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Existing Sender Folder": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Upload Attachment File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Attachment File": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folder - Sender": {
+      "main": [
+        [
+          {
+            "node": "Edit Sender Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Sender Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folder - Date": {
+      "main": [
+        [
+          {
+            "node": "Edit Date Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Date Fields": {
+      "main": [
+        [
+          {
+            "node": "Search Sender Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folder - Label": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Search Date Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Label 2": {
+      "main": [
+        [
+          {
+            "node": "Extract Fields Label 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Fields Label 2": {
+      "main": [
+        [
+          {
+            "node": "Extraction Sender Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Label 3": {
+      "main": [
+        [
+          {
+            "node": "Extract Fields Label 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Fields Label 3": {
+      "main": [
+        [
+          {
+            "node": "Extraction Sender Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e32e06aa-328a-4a53-89aa-4ed1fd3f6582",
+  "meta": {
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "SZmeJ16cgQIW1RxZ",
+  "tags": []
+}

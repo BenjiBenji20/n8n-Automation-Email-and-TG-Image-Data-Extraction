@@ -1,0 +1,611 @@
+{
+  "name": "Job Application Assessment: Telegram Receipt Photo Processing",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "495e6101-534b-4d3b-8808-a6f1e8c720b0",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        688,
+        -176
+      ],
+      "webhookId": "YOUR_TELEGRAM_WEBHOOK_ID_1",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[$json.message.photo.length - 1].file_id }}",
+        "additionalFields": {}
+      },
+      "id": "476baefb-a51b-42a4-a134-72f438f33003",
+      "name": "Image Extractor",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        -176
+      ],
+      "webhookId": "YOUR_TELEGRAM_WEBHOOK_ID_2",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "689dd52d-18b1-4be4-a811-b2051ec4aeae",
+              "name": "senderName",
+              "value": "={{ $('Telegram Trigger').item.json.message.from.first_name }} {{ $('Telegram Trigger').item.json.message.from.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "9b4d1794-f01a-47d3-b70b-93b887cc2c3e",
+              "name": "chatId",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "810d2978-e3a7-47e7-be8e-1de65bbcd3da",
+              "name": "submissionDate",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d85d2baa-c932-4d0e-acb7-5627e615c6b0",
+      "name": "Get Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1136,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.6-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.6-flash"
+        },
+        "text": "You are extracting structured data from a receipt image. Return ONLY a valid JSON object with exactly these fields, no other text, no markdown formatting, no code blocks:\n\n{\n  \"merchantName\": \"string, the store/business name\",\n  \"amount\": \"string, the total amount paid including currency symbol if visible\",\n  \"date\": \"string, the transaction date in YYYY-MM-DD format if determinable, otherwise the raw date as printed\"\n}\n\nIf any field cannot be determined from the image, use \"unknown\" as the value. Do not include any explanation, preamble, or markdown code fences — only the raw JSON object.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "id": "bb09cc77-139d-4348-a32f-b628ece00764",
+      "name": "Gemini Image Text Analyzer",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        -176
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_GEMINI_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.content?.parts?.[0]?.text || $json.text || \"\";\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nconst parsed = match ? JSON.parse(match[0]) : { merchantName: \"unknown\", amount: \"unknown\", date: \"unknown\" };\nreturn [{ json: parsed }];"
+      },
+      "id": "e4ffe2da-8a0c-46de-b83c-773ed0daf368",
+      "name": "JSON Parser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "n8n Receipt Extraction",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Receipt Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Amount": "={{ $json.amount }}",
+            "Date": "={{ $json.date }}",
+            "Sender Name": "={{ $('Get Fields').item.json.senderName }}",
+            "Submission Date": "={{ $('Get Fields').item.json.submissionDate }}",
+            "Merchant": "={{ $json.merchantName }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Sender Name",
+              "displayName": "Sender Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Merchant",
+              "displayName": "Merchant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Submission Date",
+              "displayName": "Submission Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2c22d949-fca4-4dfe-9633-b79fe0325543",
+      "name": "Append row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1808,
+        -272
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $('Get Fields').item.json.submissionDate }}",
+        "returnAll": true,
+        "filter": {
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+            "cachedResultName": "n8n automation",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_FOLDER_ID"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "id": "919731bc-9313-45e9-b531-2f5008c0e5f6",
+      "name": "Search files and folders",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1808,
+        -80
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3caa3f06-6460-4e0b-933c-7863377b7c94",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4ffb11ce-ceaf-43d8-aea1-ff48931f521f",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2032,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const searchItems = $input.all();\nconst folder = searchItems[0];\n\nconst imageItems = $('Image Extractor').all();\nconst latestImage = imageItems[imageItems.length - 1];\n\nreturn [{\n  json: { id: folder.json.id },\n  binary: latestImage.binary\n}];"
+      },
+      "id": "073e3ba9-30f7-4232-84cc-70ff7f488a13",
+      "name": "Binary Forwarding (Existing Folder)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Image Extractor').item.binary?.data?.fileName || 'receipt.jpg' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "0d7489d7-8e2d-409a-85ce-009d3885ffc7",
+      "name": "Upload Receipt File Image",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2704,
+        -80
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Get Fields').item.json.submissionDate }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "mode": "list",
+          "cachedResultName": "n8n automation",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_FOLDER_ID"
+        },
+        "options": {}
+      },
+      "id": "17e47472-bae3-4046-82f1-c950e8023869",
+      "name": "Create Folder - Submission Date",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2256,
+        16
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allInputs = $input.all();\nconst latestInput = allInputs[allInputs.length - 1];\n\nconst imageItems = $('Image Extractor').all();\nconst latestImage = imageItems[imageItems.length - 1];\n\nreturn [{\n  json: { id: latestInput.json.id },\n  binary: latestImage.binary\n}];"
+      },
+      "id": "b09cc514-9594-41b4-bfb4-b69969acb46a",
+      "name": "Binary Forwarding",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Web hook to Process Image sent to Bot\n\nTriggers the whole branch of nodes if tg web hook receives a trigger."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "50b9d084-ef83-42f0-b8e4-c150166948fd",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Extract Fields and Binary Data",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        912,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "65523b1f-2ab8-4256-9adc-ee9ac45bc5b7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Gemini Image Processing\n\nCall Gemini Flash 3.1 model to send prompt for extracting key fields present in image receipt. ",
+        "height": 112,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1296,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "3df0d18f-1728-450f-b8ad-2d2b9cced12f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Append Rows in Sheet\n\nAppend gemini model's extracted fields present in an image receipt.",
+        "height": 128
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1952,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "c2e03950-2700-47a8-a878-e572d4506339",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Search & Conditional\n\nSearch folder by submission date and returns object if found.\n\nIf found, use that existing folder, else create one. Necessary to avoid duplicate folder creation.\n",
+        "height": 176,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1728,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "e808b594-552d-494f-b160-540c8817278d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Upload to Drive Folder\n\nUpload image receipt to its correct, by submission date folder.",
+        "height": 128
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2672,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "145cce78-b2e5-44f1-bd89-8a78e7f519cd",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Image Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Extractor": {
+      "main": [
+        [
+          {
+            "node": "Get Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Fields": {
+      "main": [
+        [
+          {
+            "node": "Gemini Image Text Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Image Text Analyzer": {
+      "main": [
+        [
+          {
+            "node": "JSON Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Parser": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Binary Forwarding (Existing Folder)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Folder - Submission Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Binary Forwarding (Existing Folder)": {
+      "main": [
+        [
+          {
+            "node": "Upload Receipt File Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folder - Submission Date": {
+      "main": [
+        [
+          {
+            "node": "Binary Forwarding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Binary Forwarding": {
+      "main": [
+        [
+          {
+            "node": "Upload Receipt File Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "dbd7c6e5-ceac-4210-b03e-18e6dedbb7b2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "OIgJTXUrPICZUz9D",
+  "tags": []
+}
